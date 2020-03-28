@@ -1,46 +1,47 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mongoose =require('mongoose');
+const mongoose = require('mongoose');
 const multer = require('multer');
-const shortid=require('shortid');
-const path=require('path');
+const shortid = require('shortid');
+const path = require('path');
+const compression = require('compression');
 
 const signroutes = require('./routes/signup');
 
 const app = express();
 
 const fileStorage = multer.diskStorage({
-    destination:(req,file,cb)=>{
-        cb(null,'images');
+    destination: (req, file, cb) => {
+        cb(null, 'images');
     },
-    filename:(req,file,cb)=>{
-        cb(null,shortid.generate().toString()+file.originalname);
+    filename: (req, file, cb) => {
+        cb(null, shortid.generate().toString() + file.originalname);
     }
 });
 
-const fileFilter = (req,file,cb)=>{
-    if(
+const fileFilter = (req, file, cb) => {
+    if (
         file.mimetype === 'image/png' ||
         file.mimetype === 'image/jpg' ||
         file.mimetype === 'image/jpeg'
     ) {
-        cb(null,true);
+        cb(null, true);
     }
     else {
-        cb(null,false);
+        cb(null, false);
     }
 }
 
 app.use(bodyParser.json());
-app.use('/images',express.static(path.join(__dirname,'images')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use(
-    multer({storage:fileStorage,fileFilter:fileFilter}).single('image')
+    multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
 );
 
-app.use((req,res,next)=>{
-    res.setHeader('Access-Control-Allow-Origin','*');
-    res.setHeader('Acess-Control-Allow-Methods','*');
-    res.setHeader('Aceess-Control-Allow-Headers','Content-Type, Authorization');
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Acess-Control-Allow-Methods', '*');
+    res.setHeader('Aceess-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
 })
 
@@ -49,14 +50,14 @@ app.use((error, req, res, next) => {
     const status = error.statusCode || 500;
     const message = error.message;
     res.status(status).json({ message: message });
- });
-  
-app.use('/sign',signroutes);
+});
 
+app.use('/sign', signroutes);
+app.use(compression());
 mongoose.connect(
     'mongodb+srv://admin:fbfuKOUSXQOLiIqF@cluster0-voers.gcp.mongodb.net/stickman?retryWrites=true&w=majority'
 )
-.then(result=>{
-    app.listen(process.env.PORT||3000);
-})
-.catch(err=>console.log(err));
+    .then(result => {
+        app.listen(process.env.PORT || 3000);
+    })
+    .catch(err => console.log(err));
