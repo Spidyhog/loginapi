@@ -57,6 +57,6 @@ mongoose.connect(
     'mongodb+srv://admin:fbfuKOUSXQOLiIqF@cluster0-voers.gcp.mongodb.net/stickman?retryWrites=true&w=majority'
 )
 .then(result=>{
-    app.listen(8080);
+    app.listen(process.env.PORT||3000);
 })
 .catch(err=>console.log(err));
